@@ -133,6 +133,10 @@ export default class Form extends PureComponent {
     };
   }
 
+  componentDidMount() {
+    this.props.onRef(this);
+  }
+
   render() {
     const {
       schema,
@@ -260,6 +264,7 @@ if (process.env.NODE_ENV !== "production") {
     onError: PropTypes.func,
     showErrorList: PropTypes.bool,
     onSubmit: PropTypes.func,
+    onRef: PropTypes.func,
     id: PropTypes.string,
     className: PropTypes.string,
     name: PropTypes.string,
