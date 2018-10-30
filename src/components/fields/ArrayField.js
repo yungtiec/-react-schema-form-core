@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
 
-import UnsupportedField from './UnsupportedField';
+import UnsupportedField from "./UnsupportedField";
 import {
   getWidget,
   getDefaultFormState,
@@ -13,7 +13,7 @@ import {
   optionsList,
   retrieveSchema,
   toIdSchema
-} from '../../utils';
+} from "../../utils";
 
 class ArrayField extends Component {
   static defaultProps = {
@@ -28,17 +28,17 @@ class ArrayField extends Component {
 
   get itemTitle() {
     const { schema } = this.props;
-    return schema.items.title || schema.items.description || 'Item';
+    return schema.items.title || schema.items.description || "Item";
   }
 
   isItemRequired(itemSchema) {
     if (Array.isArray(itemSchema.type)) {
       // While we don't yet support composite/nullable jsonschema types, it's
       // future-proof to check for requirement against these.
-      return !itemSchema.type.includes('null');
+      return !itemSchema.type.includes("null");
     }
     // All non-null array item types are inherently required by design
-    return itemSchema.type !== 'null';
+    return itemSchema.type !== "null";
   }
 
   canAddItem(formItems) {
@@ -56,7 +56,8 @@ class ArrayField extends Component {
     return addable;
   }
 
-  onAddClick = event => {
+  onAddClick = (event, localFormData) => {
+    console.log("hello", localFormData);
     event.preventDefault();
     const { schema, formData, registry } = this.props;
     const { definitions } = registry;
@@ -64,10 +65,12 @@ class ArrayField extends Component {
     if (isFixedItems(schema) && allowAdditionalItems(schema)) {
       itemSchema = schema.additionalItems;
     }
-    this.props.onChange([
-      ...formData,
-      getDefaultFormState(itemSchema, undefined, definitions)
-    ]);
+    if (localFormData) this.props.onChange(localFormData);
+    else
+      this.props.onChange([
+        ...formData,
+        getDefaultFormState(itemSchema, undefined, definitions)
+      ]);
   };
 
   onDropIndexClick = index => {
@@ -138,16 +141,16 @@ class ArrayField extends Component {
       const newFormData = formData.map((item, i) => {
         // We need to treat undefined items as nulls to have validation.
         // See https://github.com/tdegrunt/jsonschema/issues/206
-        const jsonValue = typeof value === 'undefined' ? null : value;
+        const jsonValue = typeof value === "undefined" ? null : value;
         return index === i ? jsonValue : item;
       });
       onChange(
         newFormData,
         errorSchema &&
           this.props.errorSchema && {
-          ...this.props.errorSchema,
-          [index]: errorSchema
-        }
+            ...this.props.errorSchema,
+            [index]: errorSchema
+          }
       );
     };
   };
@@ -159,7 +162,7 @@ class ArrayField extends Component {
   render() {
     const { schema, uiSchema, idSchema, registry } = this.props;
     const { definitions } = registry;
-    if (!schema.hasOwnProperty('items')) {
+    if (!schema.hasOwnProperty("items")) {
       return (
         <UnsupportedField
           schema={schema}
@@ -211,7 +214,7 @@ class ArrayField extends Component {
       items: formData.map((item, index) => {
         const itemSchema = retrieveSchema(schema.items, definitions, item);
         const itemErrorSchema = errorSchema ? errorSchema[index] : undefined;
-        const itemIdPrefix = idSchema.$id + '_' + index;
+        const itemIdPrefix = idSchema.$id + "_" + index;
         const itemIdSchema = toIdSchema(
           itemSchema,
           itemIdPrefix,
@@ -272,7 +275,7 @@ class ArrayField extends Component {
     const { widgets, definitions, formContext } = registry;
     const itemsSchema = retrieveSchema(schema.items, definitions, formData);
     const enumOptions = optionsList(itemsSchema);
-    const { widget = 'select', ...options } = {
+    const { widget = "select", ...options } = {
       ...getUiOptions(uiSchema),
       enumOptions
     };
@@ -313,7 +316,7 @@ class ArrayField extends Component {
     const title = schema.title || name;
     const items = this.props.formData;
     const { widgets, formContext } = registry;
-    const { widget = 'files', ...options } = getUiOptions(uiSchema);
+    const { widget = "files", ...options } = getUiOptions(uiSchema);
     const Widget = getWidget(schema, widget, widgets);
     return (
       <Widget
@@ -373,7 +376,7 @@ class ArrayField extends Component {
     // These are the props passed into the render function
     const arrayProps = {
       canAdd: this.canAddItem(items) && additionalSchema,
-      className: 'field field-array field-array-fixed-items',
+      className: "field field-array field-array-fixed-items",
       disabled,
       idSchema,
       formData,
@@ -382,7 +385,7 @@ class ArrayField extends Component {
         const itemSchema = additional
           ? retrieveSchema(schema.additionalItems, definitions, item)
           : itemSchemas[index];
-        const itemIdPrefix = idSchema.$id + '_' + index;
+        const itemIdPrefix = idSchema.$id + "_" + index;
         const itemIdSchema = toIdSchema(
           itemSchema,
           itemIdPrefix,
@@ -449,7 +452,7 @@ class ArrayField extends Component {
     const { orderable, removable } = {
       orderable: true,
       removable: true,
-      ...uiSchema['ui:options']
+      ...uiSchema["ui:options"]
     };
     const has = {
       moveUp: orderable && canMoveUp,
@@ -477,7 +480,7 @@ class ArrayField extends Component {
           rawErrors={rawErrors}
         />
       ),
-      className: 'array-item',
+      className: "array-item",
       disabled,
       hasToolbar: has.toolbar,
       hasMoveUp: has.moveUp,
@@ -491,11 +494,11 @@ class ArrayField extends Component {
   }
 }
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   ArrayField.propTypes = {
     schema: PropTypes.object.isRequired,
     uiSchema: PropTypes.shape({
-      'ui:options': PropTypes.shape({
+      "ui:options": PropTypes.shape({
         addable: PropTypes.bool,
         orderable: PropTypes.bool,
         removable: PropTypes.bool
